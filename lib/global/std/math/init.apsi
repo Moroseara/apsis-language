@@ -1,0 +1,14 @@
+## lib/global/std/math/init.apsi
+## Standard Math Library for Apsis
+
+pub const PI f64 = 3.141592653589793
+
+#[intrinsic("sqrt_f64")]
+pub fn sqrt(val f64) f64
+
+pub fn abs(val f64) f64 {
+    if val < 0.0 {
+        return -val
+    }
+    return val
+}

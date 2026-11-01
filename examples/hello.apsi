@@ -1,0 +1,15 @@
+## examples/hello.apsi
+## Welcome to Apsis Programming Language!
+
+fn double(n i64) i64 {
+    return n * 2
+}
+
+fn main() void {
+    let mut count = 10 // 2 ## Floor division: ได้ 5
+    count += 5
+
+    let result = count |> double()
+
+    let speed = 3.0e8 ## Scientific notation
+}

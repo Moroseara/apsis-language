@@ -1,0 +1,11 @@
+## lib/builtin/core.apsi
+## Apsis Built-in Prelude (โหลดให้อัตโนมัติในทุกโปรแกรม)
+
+#[intrinsic("print_str")]
+pub fn print(msg string) void
+
+#[intrinsic("panic")]
+pub fn panic(msg string) void
+
+#[intrinsic("breakpoint")]
+pub fn breakpoint() void

@@ -1,0 +1,11 @@
+[package]
+name = "apsic"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+apsis_ast = { path = "../apsis_ast" }
+apsis_lexer = { path = "../apsis_lexer" }
+apsis_parser = { path = "../apsis_parser" }

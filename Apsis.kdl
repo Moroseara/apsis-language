@@ -1,0 +1,8 @@
+project name="hello_apsis" version="0.1.0" {
+    entry "examples/hello.apsi"
+}
+
+build {
+    mode "standalone"
+    opt_level 3
+}
