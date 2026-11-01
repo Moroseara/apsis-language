@@ -3,7 +3,7 @@
 ## 1. Compiler Pipeline
 
 ```
-[ Source Code (.apsis / .lang) ]
+[ Source Code (.apsi) ]
                │
                ▼
    [ Frontend: Lexer + Parser ]       ──► สร้าง Abstract Syntax Tree (AST)

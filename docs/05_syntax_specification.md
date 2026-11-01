@@ -6,13 +6,13 @@
 
 ```
 ## Compile-time Constant (คำนวณตอน Compile ไม่กิน Memory Runtime)
-const MAX_BUFFER_SIZE int = 4096
-const PI float = 3.1415926535
+const MAX_BUFFER_SIZE i64 = 4096
+const PI f64 = 3.1415926535
 
 fn example() {
     ## Immutable Variable (อ่านอย่างเดียว แก้ไขไม่ได้)
     let name = "Alice"
-    let age int = 20
+    let age i64 = 20
 
     ## Mutable Variable (ต้องใส่ mut ชัดเจนเพื่ออนุญาตให้แก้ไขได้)
     let mut counter = 0
@@ -43,6 +43,36 @@ fn get_or_default[T](item T, fallback T = T.default()) T {
 }
 ```
 
+### Variadic Functions (พารามิเตอร์แบบไม่จำกัดจำนวน `...`):
+ฟังก์ชันสามารถรับ Argument ได้ไม่จำกัดจำนวน โดยคอมไพเลอร์จะมองพารามิเตอร์นั้นเป็น Zero-Copy Slice `[T]`:
+
+```
+## 1. Type-Safe Variadic ใน Apsis
+fn sum(numbers ...i64) i64 {
+    let mut total = 0_i64
+    for n in numbers {
+        total += n
+    }
+    return total
+}
+
+fn print_all(messages ...string) {
+    for msg in messages {
+        print(msg)
+    }
+}
+
+fn example() {
+    let total = sum(1, 2, 3, 4, 5) ## ส่งกี่ตัวก็ได้
+    print_all("Hello", "World", "from", "Apsis")
+}
+
+## 2. C-FFI Variadic (สำหรับเรียก libc printf)
+extern "C" {
+    fn printf(format *const u8, ...) i32
+}
+```
+
 ### การเรียกใช้ฟังก์ชัน (Call Site):
 ```
 ## เรียกแบบปกติ
@@ -66,7 +96,7 @@ let res5 = get_or_default("Data", fallback: "Empty") ## Auto-inferred T = string
 ฟังก์ชันที่ต้องการแก้ไขค่าของ Argument ต้นทาง (In-place Mutation แบบ Exclusive) จะต้องระบุ `mut` ทั้งที่หัวฟังก์ชันและจุดเรียก:
 
 ```
-fn increment(mut value int, step int = 1) {
+fn increment(mut value i64, step i64 = 1) {
     value += step
 }
 
@@ -92,11 +122,11 @@ fn main() {
 
 ```
 struct Vector2 {
-    x float = 0.0
-    y float = 0.0
+    x f64 = 0.0
+    y f64 = 0.0
 
     ## Immutable Method
-    fn length(self) float {
+    fn length(self) f64 {
         return math.sqrt(self.x * self.x + self.y * self.y)
     }
 
@@ -130,8 +160,8 @@ enum Option[T] {
 
 enum Event {
     Quit
-    KeyPress(key int)
-    MouseMove(x int, y int)
+    KeyPress(key i64)
+    MouseMove(x i64, y i64)
 }
 
 fn handle_event(event Event) {
@@ -156,7 +186,7 @@ fn handle_event(event Event) {
 รองรับการแกะค่า Pattern (Pattern Binding) พร้อมเงื่อนไขต่อเนื่องด้วยเครื่องหมายจุลภาค `,`
 
 ```
-fn process_data(opt Option[int]) {
+fn process_data(opt Option[i64]) {
     ## if let พร้อมเงื่อนไขหลายชั้น
     if let Option.Some(data) = opt, data > 10 {
         print("Valid high data: {data}")
@@ -255,11 +285,11 @@ let file_mode = 0o755
 ยกระดับความอ่านง่ายของโค้ดด้วย **Pipe Operator** สำหรับส่งผลลัพธ์จากซ้ายไปเป็น Argument แรกของฟังก์ชันทางขวา:
 
 ```
-fn double(n int) int {
+fn double(n i64) i64 {
     return n * 2
 }
 
-fn add(a int, b int) int {
+fn add(a i64, b i64) i64 {
     return a + b
 }
 
@@ -290,7 +320,7 @@ fn main() {
 
 ```
 ## การประกาศ Map พร้อมกำหนด Type และรองรับ Trailing Comma
-let scores {string: int} = {
+let scores {string: i64} = {
     "Alice": 100,
     "Bob": 85,
     "Charlie": 92,
@@ -306,7 +336,7 @@ let mut config = {
 config["retries"] = 5
 
 ## ประกาศ Map เปล่า
-let empty_map {string: int} = {}
+let empty_map {string: i64} = {}
 ```
 
 ### 2. List (Dynamic Array / Vector)
@@ -344,11 +374,11 @@ if let value = scores.get("Alice") {
 
 ```
 ## 1. ประกาศ Tuple และ Type
-let point (int, int) = (10, 20)
+let point (i64, i64) = (10, 20)
 let single_item = (42,) ## ทูเพิล 1 ตัว ต้องมีจุลภาคต่อท้ายเพื่อแยกจากวงเล็บคำนวณ
 
 ## 2. คืนค่าหลายค่าจากฟังก์ชัน
-fn get_user_status() (string, int, bool) {
+fn get_user_status() (string, i64, bool) {
     return ("Morose", 100, true)
 }
 
@@ -372,7 +402,7 @@ let factor = 2
 let double = |x| x * factor
 
 ## 2. Multi-line closure with types
-let calculate = |a int, b int| int {
+let calculate = |a i64, b i64| i64 {
     let temp = a * 2
     return temp + b
 }
@@ -447,7 +477,7 @@ trait Printable {
 
 struct User {
     name string
-    age int
+    age i64
 }
 
 ## ผูก Trait เข้ากับ Struct
@@ -521,7 +551,7 @@ extern "C" {
 ## 4. unsafe Block: สำหรับเรียกใช้ฟังก์ชัน extern หรือจัดการ Raw Pointer (*const T, *mut T)
 fn print_process_info() {
     unsafe {
-        puts(b"Running in Apsi native process\0".as_ptr())
+        puts(b"Running in Apsis native process\0".as_ptr())
         let pid = getpid()
         print(f"PID: {pid}")
     }
@@ -559,7 +589,7 @@ fn main() {
 
 ```
 ## 1. Function Overloading ตามประเภทข้อมูล
-fn print_value(val int) {
+fn print_value(val i64) {
     print(f"Integer: {val}")
 }
 
@@ -573,17 +603,17 @@ fn print_value(val bool) {
 
 ## 2. Overloading ร่วมกับ Named Arguments
 struct Canvas {
-    fn draw_circle(self, radius float) {
+    fn draw_circle(self, radius f64) {
         ## วาดที่จุด (0, 0)
     }
 
-    fn draw_circle(self, x float, y float, radius float) {
+    fn draw_circle(self, x f64, y f64, radius f64) {
         ## วาดตามพิกัดที่กำหนด
     }
 }
 
 fn main() {
-    print_value(100)      ## เรียก print_value(val int)
+    print_value(100)      ## เรียก print_value(val i64)
     print_value("Hello")  ## เรียก print_value(val string)
 
     let canvas = Canvas()
@@ -598,33 +628,113 @@ fn main() {
 
 ---
 
-## 20. Operator Overloading (ผ่าน Traits)
+## 20. Operator Overloading & Special Functions (`__add`, `__init`, etc.)
 
-การโอเวอร์โหลดเครื่องหมายทางคณิตศาสตร์ (`+`, `-`, `*`, `/`) และการเข้าถึงข้อมูล (`[]`) จะกระทำผ่าน **Standard Traits** เพื่อรักษาความสะอาดของโค้ดและความปลอดภัย:
+ภาษา Apsis ใช้แนวคิด **Special Functions (Dunder Methods)** สำหรับการโอเวอร์โหลดตัวดำเนินการและกำหนดวงจรชีวิตของข้อมูล โดยคอมไพเลอร์จะทำการแปลงรูป (Desugar) และทำ Inlining ตรงเข้าสู่คำสั่ง CPU โดยไม่มี Overhead:
+
+### 1. การโอเวอร์โหลดตัวดำเนินการทางคณิตศาสตร์:
+เมื่อมีคำสั่ง `a + b` คอมไพเลอร์จะเรียกเมธอด `a.__add(b)` ทันที:
 
 ```
-import "std/ops" { Add, Index }
-
 struct Vector2 {
-    x float
-    y float
-}
+    x f64
+    y f64
 
-## โอเวอร์โหลดเครื่องหมาย + ด้วย trait Add
-impl Add[Vector2, Vector2] for Vector2 {
-    fn add(self, other Vector2) Vector2 {
+    ## โอเวอร์โหลดเครื่องหมาย +
+    fn __add(self, other Vector2) Vector2 {
         return Vector2(x: self.x + other.x, y: self.y + other.y)
+    }
+
+    ## โอเวอร์โหลดเครื่องหมาย -
+    fn __sub(self, other Vector2) Vector2 {
+        return Vector2(x: self.x - other.x, y: self.y - other.y)
+    }
+
+    ## โอเวอร์โหลดการหารปัดเศษลง //
+    fn __floordiv(self, scalar f64) Vector2 {
+        return Vector2(x: self.x // scalar, y: self.y // scalar)
+    }
+
+    ## โอเวอร์โหลดการเปรียบเทียบ ==
+    fn __eq(self, other Vector2) bool {
+        return self.x == other.x && self.y == other.y
+    }
+}
+```
+
+### 2. การเข้าถึง Index ด้วยก้ามปู `[]` (`__index`, `__set_index`):
+```
+struct IntBuffer {
+    data [i64]
+
+    ## เมื่อเรียก buffer[idx]
+    fn __index(self, idx usize) i64 {
+        return self.data[idx]
+    }
+
+    ## เมื่อเรียก buffer[idx] = val (MVS Exclusive Mutation)
+    fn __set_index(mut self, idx usize, val i64) {
+        self.data[idx] = val
+    }
+}
+```
+
+#### Mutable Projection (`__index_mut`):
+เมื่อต้องการแก้ไข **ส่วนย่อยภายใน** สมาชิกที่เข้าถึงด้วย `[]` ในที่เดิม (เช่น `world[id].hp -= 10`) ให้กำหนด `__index_mut` ที่คืนค่าเป็น `mut T` — ค่านี้เป็น **Projection** ที่มีชีวิตอยู่แค่ใน Expression นั้น (เก็บลงตัวแปร/Struct หรือ return ต่อไม่ได้ จึงไม่ต้องมี Lifetime — ดู doc 02 §5.1):
+
+```
+struct Entities {
+    items [Entity]
+
+    fn __index_mut(mut self, idx usize) mut Entity {
+        return mut self.items[idx]
     }
 }
 
-fn main() {
-    let v1 = Vector2(x: 1.0, y: 2.0)
-    let v2 = Vector2(x: 3.0, y: 4.0)
+let mut world = Entities(items: load_entities())
+world[3].hp -= 10                    ## เรียก __index_mut แล้วแก้ hp ในที่เดิม ไม่ Copy Entity ออกมา
+world[3].inventory.push(sword)
+heal(mut world[3], amount: 50)       ## ส่ง Projection เข้า mut Parameter ได้
+```
 
-    ## ใช้เครื่องหมาย + ได้อย่างเป็นธรรมชาติ
-    let v3 = v1 + v2 ## ได้ Vector2(x: 4.0, y: 6.0)
+ถ้าไม่ได้กำหนด `__index_mut` คอมไพเลอร์จะแปลง `a[i].field = v` เป็น `__index` → แก้ → `__set_index` ให้อัตโนมัติ (ถูกต้องเสมอแต่อาจ Copy)
+
+### 3. วงจรชีวิตของข้อมูล (`__init`, `__drop`, `__str`):
+- `__init(mut self, ...)`: Custom Constructor เมื่อสร้างอินสแตนซ์
+- `__drop(mut self)`: Custom Destructor ทำงานอัตโนมัติก่อนตัวแปรหลุดออกจาก Scope `{}` (Deterministic Cleanup)
+- `__str(self) string`: สำหรับแปลงข้อมูลเป็นข้อความใน f-strings `f"{object}"`
+
+```
+struct DatabaseConnection {
+    handle *mut void
+
+    fn __init(mut self, connection_str string) {
+        self.handle = open_db(connection_str)
+    }
+
+    fn __drop(mut self) {
+        close_db(self.handle) ## คลีนอัปอัตโนมัติ 100% เมื่อพ้น Scope
+    }
 }
 ```
+
+### สารบัญ Special Functions:
+
+| ตัวดำเนินการ / เหตุการณ์ | Special Function | ตัวอย่างเมื่อเขียนโค้ด |
+| :--- | :--- | :--- |
+| `a + b` | `a.__add(b)` | `v1 + v2` |
+| `a - b` | `a.__sub(b)` | `v1 - v2` |
+| `a * b` | `a.__mul(b)` | `v1 * 2` |
+| `a / b` | `a.__div(b)` | `v1 / 2.0` |
+| `a // b` | `a.__floordiv(b)` | `v1 // 2.0` |
+| `a % b` | `a.__mod(b)` | `a % b` |
+| `a == b` | `a.__eq(b)` | `if v1 == v2` |
+| `a[i]` | `a.__index(i)` | `let x = arr[0]` |
+| `a[i] = v` | `a.__set_index(i, v)` | `arr[0] = 10` |
+| `a[i].field = v` / `f(mut a[i])` | `a.__index_mut(i)` | `world[3].hp -= 10` |
+| f-string `"{a}"` | `a.__str()` | `print(f"{player}")` |
+| Constructor | `a.__init(...)` | `let db = DatabaseConnection(...)` |
+| Destructor | `a.__drop()` | ทำงานอัตโนมัติเมื่อถึง `}` |
 
 ---
 
@@ -636,10 +746,10 @@ fn main() {
 ## 1. Type Aliases พื้นฐาน
 interface UserID = u64
 interface StringMap = {string: string}
-interface NumberList = [float]
+interface NumberList = [f64]
 
 ## 2. Closure Signature Alias
-interface EventHandler = |event string, code int| void
+interface EventHandler = |event string, code i64| void
 
 ## การนำไปใช้งาน
 let id UserID = 100928_u64
@@ -663,8 +773,8 @@ fn serialize[T](item T) string {
     ## ตรวจสอบ Type ตั้งแต่ตอน Compile
     when T is string {
         return item ## ไม่ต้องแปลง คืนค่าได้ทันที
-    } else when T is int {
-        return int.to_string(item)
+    } else when T is i64 {
+        return i64.to_string(item)
     } else {
         return item.to_string()
     }
@@ -674,11 +784,13 @@ fn serialize[T](item T) string {
 ### 2. Type Checking & Value Inspection (`when type(a) is ...`):
 ใช้ตรวจสอบ Type ของตัวแปรขณะทำงาน หรือใช้เป็น Expression-based Conditional:
 
+> **ขอบเขตของ Runtime Inspection**: `when type(x) is ...` ตรวจตอนรันได้ **เฉพาะค่าที่เป็น `Any` หรือ Trait Object** (§33) เท่านั้น เพราะค่าเหล่านี้พก Type ID ไว้ใน Fat Pointer อยู่แล้ว ถ้า `x` เป็น Type ที่รู้แน่นอนตอนคอมไพล์ คอมไพเลอร์จะตัดสินใจทันทีตอน Compile (เหมือนแบบที่ 1) — ค่าทั่วไปจึง **ไม่ต้องฝังข้อมูล Type** ไว้ในหน่วยความจำ และหลัก Zero Runtime ยังคงอยู่
+
 ```
 fn inspect_value(val Any) {
     when type(val) is string {
         print(f"String of length {val.length()}") ## Smart Cast อัตโนมัติ
-    } else when type(val) is int {
+    } else when type(val) is i64 {
         print(f"Number multiplied: {val * 2}")
     } else {
         print("Unknown type")
@@ -751,8 +863,8 @@ let to_end = numbers[2..]       ## ได้ [30, 40, 50]
 การแปลงประเภทข้อมูลอย่างชัดเจน ปลอดภัย และไร้ Runtime Overhead:
 
 ```
-let total int = 100
-let average float = (total as float) / 3.0
+let total i64 = 100
+let average f64 = (total as f64) / 3.0
 
 let byte_val u8 = 255_u8
 let int_val u32 = byte_val as u32
@@ -939,9 +1051,14 @@ fn example() {
 
 - ฟังก์ชัน `async fn` จะถูกคอมไพเลอร์แปลงเป็น **State Machine Struct** ขนาดเล็กตอน Compile
 - สลับงานบน Event Loop ได้ระดับแสนการเชื่อมต่อพร้อมกัน (C100k)
+- **ภาษาไม่มี Executor ฝังในตัว**: `async fn` แค่สร้าง State Machine — ตัวที่สั่งให้มันเดินคือ **Executor ที่ผู้ใช้เลือกเอง** โปรแกรมที่ไม่ใช้ `async` จึงไม่มีภาระใดๆ
+  - `std/async` มี Executor มาตรฐาน (Event Loop บน epoll / kqueue / IOCP) ให้ใช้ได้ทันที
+  - ไลบรารีภายนอกเขียน Executor ของตัวเองได้ (เช่น Executor ของ Game Engine ที่เดินงานทีละเฟรม) ผ่าน Trait `Future` และ `Waker` ใน `std/async`
+  - `.so` / `.dll` ที่ส่งออกฟังก์ชัน `async` ต้องห่อด้วยฟังก์ชันธรรมดา (Blocking หรือ Callback) ก่อนส่งข้าม C-ABI
 
 ```
 import "std/net" { TcpListener, TcpStream }
+import "std/async" { Executor, spawn_task }
 
 async fn handle_client(mut stream TcpStream) Result[void, NetError] {
     let mut buffer = [u8].with_capacity(1024)
@@ -951,11 +1068,17 @@ async fn handle_client(mut stream TcpStream) Result[void, NetError] {
     return Result.Ok(())
 }
 
-async fn start_server() {
+async fn start_server() Result[void, NetError] {
     let listener = TcpListener.bind("127.0.0.1:8080").await?
     while let Result.Ok(stream) = listener.accept_async().await {
         spawn_task(handle_client(stream))
     }
+    return Result.Ok(())
+}
+
+fn main() {
+    ## จุดเดียวที่ Executor ถูกสร้าง — ทั้งโปรแกรมรันบน Event Loop นี้
+    Executor.default().block_on(start_server())
 }
 ```
 
@@ -1009,12 +1132,29 @@ impl Widget for Slider {
     fn on_click(mut self) { print("Slider dragged!") }
 }
 
-fn render_screen(widgets [dyn Widget]) {
+## ใช้ชื่อ Trait เป็น Type ได้ตรงๆ = Dynamic Dispatch (ไม่ต้องเขียน dyn)
+fn render_screen(widgets [Widget]) {
     for widget in widgets {
         widget.render() ## Dynamic Dispatch ผ่าน vtable
     }
 }
+
+## เขียน dyn กำกับก็ได้ ถ้าอยากให้คนอ่านเห็นชัดว่าตรงนี้ใช้ vtable (ความหมายเหมือนกัน 100%)
+fn render_all(widgets [dyn Widget]) { ... }
+
+## ถ้าต้องการ Static Dispatch (Monomorphization, เร็วสุด) ให้ใช้ Generic
+fn render_one[T: Widget](widget T) {
+    widget.render() ## เรียกตรง ไม่ผ่าน vtable
+}
 ```
+
+### กฎการเลือก Dispatch:
+| เขียนแบบ | Dispatch | ใช้เมื่อ |
+| :--- | :--- | :--- |
+| `[T: Widget]` (Generic) | Static (Compile-time) | รู้ Type ตอนคอมไพล์ ต้องการความเร็วสูงสุด |
+| `Widget` หรือ `dyn Widget` (ชื่อ Trait เป็น Type) | Dynamic (vtable) | เก็บหลายชนิดในคอลเลกชันเดียว, Plugin |
+
+> Plugin ที่โหลดจาก `.so` / `.dll` ต่างไฟล์กัน ต้องส่ง Trait Object ผ่านขอบเขต C-ABI ตามกฎใน doc 03 §4
 
 ---
 

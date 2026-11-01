@@ -1,12 +1,12 @@
 # Module & Package System (`init.apsi`)
 
-เอกสารข้อกำหนดระบบโมดูล การจัดวางโครงสร้างแพ็กเกจ และบทบาทของ `init.apsi` ในภาษา Apsi
+เอกสารข้อกำหนดระบบโมดูล การจัดวางโครงสร้างแพ็กเกจ และบทบาทของ `init.apsi` ในภาษา Apsis
 
 ---
 
 ## 1. ปรัชญาของระบบโมดูล (Module Philosophy)
 
-ระบบโมดูลของ Apsi ยึดหลักการ:
+ระบบโมดูลของ Apsis ยึดหลักการ:
 1. **Directory-as-Namespace**: โฟลเดอร์คือตัวกำหนด Path ของโมดูล
 2. **Explicit Entrypoints (`init.apsi`)**: ทุกโฟลเดอร์ที่เป็นแพ็กเกจจะมี `init.apsi` เป็นประตูหลัก
 3. **No Hidden Magic**: ลำดับการ Resolve ชัดเจน ตรวจสอบได้ตั้งแต่ตอน Compile
@@ -15,15 +15,15 @@
 
 ## 2. โครงสร้างโฟลเดอร์ระดับคอมไพเลอร์ (`lib/`)
 
-เมื่อติดตั้งตัวคอมไพเลอร์ `apsi` จะมีโฟลเดอร์ `lib/` ติดตั้งอยู่ในระบบเสมอ:
+เมื่อติดตั้งตัวคอมไพเลอร์ `apsic` จะมีโฟลเดอร์ `lib/` ติดตั้งอยู่ในระบบเสมอ:
 
 ```
-apsi-compiler/
+apsis-toolchain/
 ├── bin/
-│   └── apsi                       ## ตัวคอมไพเลอร์
+│   └── apsic                      ## ตัวคอมไพเลอร์
 └── lib/
     ├── builtin/                   ## [PRELUDE] โหลดให้อัตโนมัติ ไม่ต้องสั่ง import
-    │   ├── core.apsi              ## print, panic, assert, debug
+    │   ├── init.apsi              ## print, panic, assert, debug (ประตูหลักของ Prelude)
     │   ├── option.apsi            ## enum Option[T] { Some(T), None }
     │   └── result.apsi            ## enum Result[T, E] { Ok(T), Err(E) }
     │
